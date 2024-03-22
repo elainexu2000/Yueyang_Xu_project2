@@ -1,0 +1,5 @@
+services:
+  - name: your-react-app
+    type: static
+    buildCommand: npm run build
+    publishDir: build
