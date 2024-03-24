@@ -1,5 +1,5 @@
 services:
-  - name: your-react-app
+  - name: Yueyang_Xu_project2
     type: static
     buildCommand: npm run build
     publishDir: build
