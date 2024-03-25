@@ -9,17 +9,28 @@ const Simulation = () => {
   const [width, setWidth] = useState(20);
   const [validInput, setValidInput] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [ageGrid, setAgeGrid] = useState([]);
+  const [maxAge, setMaxAge] = useState(10);
+  const [heatmapColors, setHeatmapColors] = useState({ minColor: '#000000', maxColor: '#FFFFFF' });
 
   useEffect(() => {
     initializeGrid(height, width);
   }, []);
 
-  const GridCell = ({ value, onClick }) => {
+  const GridCell = ({ value, age, onClick }) => {
+    const calculateHeatmapColor = (age) => {
+      const minRedHex = '00'; 
+      const maxRedHex = 'FF'; 
+      const minRedDec = parseInt(minRedHex, 16); 
+      const maxRedDec = parseInt(maxRedHex, 16);
+      const grayscaleValue = minRedDec + ((maxRedDec - minRedDec) * age) / maxAge;
+      return `rgb(${grayscaleValue}, ${grayscaleValue}, ${grayscaleValue})`;
+    };
     const cellStyle = {
       width: '30px',
       height: '30px',
       border: '1px solid grey',
-      backgroundColor: value ? 'white' : 'black',
+      backgroundColor: isHeatmap ? calculateHeatmapColor() : value ? 'white' : 'black',
     };
   
     return <div style={cellStyle} onClick={onClick}></div>;
@@ -43,6 +54,8 @@ const Simulation = () => {
     }
     setGrid(updatedGrid);
     updateLivingCellsCount(updatedGrid);
+    const newAgeGrid = Array.from({ length: h }, () => Array(w).fill(0));
+    setAgeGrid(newAgeGrid);
   };
 
   const renderGrid = () => {
@@ -67,6 +80,10 @@ const Simulation = () => {
     const updatedGrid = [...grid];
     updatedGrid[rowIndex][colIndex] = !updatedGrid[rowIndex][colIndex];
     setGrid(updatedGrid);
+
+    const updatedAgeGrid = [...ageGrid];
+    updatedAgeGrid[rowIndex][colIndex] = 0;
+    setAgeGrid(updatedAgeGrid);
     updateLivingCellsCount(updatedGrid);
   };
 
@@ -87,7 +104,7 @@ const Simulation = () => {
         <button onClick={handleResetGrid}>Reset Grid</button>
         <button onClick={handleNextFrame}>Next Frame</button>
         <button onClick={() => setIsHeatmap(!isHeatmap)}>
-          {isHeatmap ? 'Show Regular Colors' : 'Show Heatmap'}
+          {isHeatmap ? 'Display Regular Color' : 'Display Heatmap'}
         </button>
       </div>
     );
@@ -158,6 +175,11 @@ const Simulation = () => {
       }
       updatedGrid.push(row);
     }
+    const updatedAgeGrid = ageGrid.map((row, i) =>
+      row.map((age, j) => (grid[i][j] ? age + 1 : 0))
+    );
+    setAgeGrid(updatedAgeGrid);
+
     setGrid(updatedGrid);
     updateLivingCellsCount(updatedGrid);
   };
